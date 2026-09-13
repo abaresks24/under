@@ -1,6 +1,6 @@
 # World Selfie Check — integration notes (feedback deliverable)
 
-Notes taken while integrating World Selfie Check into Cloud Credits (SPEC §5.4). To be finished once a
+Notes taken while integrating World Selfie Check into Under (SPEC §5.4). To be finished once a
 World App ID is provisioned.
 
 ## Intent

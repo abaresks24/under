@@ -1,13 +1,14 @@
-# Cloud Credits — a secondary market for unconsumed cloud commitments
+# Under — a secondary market for unconsumed cloud commitments
 
 **Companies over-commit to multi-year cloud spend for the discounts, then leave capacity unused.
-Cloud Credits lets them resell it — at a price that decays with the time left to consume the credit,
+Under lets them resell it — at a price that decays with the time left to consume the credit,
 enforced by a Uniswap v4 hook.** Sellers are verified through an ENSv2 identity (revocable by a
 delegated role) and a World Selfie Check.
 
 > ETHGlobal submission. Single chain: **Sepolia (11155111)**. Tracks: Uniswap Foundation (Best
 > Uniswap Stack Contribution), ENS (Best Use of ENSv2), World (Selfie Check).
-> **Live demo:** https://cloud-credits-abaresks24s-projects.vercel.app
+> **Live demo:** https://cloud-credits-abaresks24s-projects.vercel.app ·
+> **Docs:** https://cloud-credits-abaresks24s-projects.vercel.app/docs
 
 ---
 
