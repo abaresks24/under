@@ -50,3 +50,17 @@ challenge game) to declare fraud.
   `seedLiquidity`.
 - The hook address was mined with `HookMiner` so its low 14 bits carry the permission flags, then
   deployed via CREATE2.
+
+## Additional markets (Sepolia) — one token + mined hook + pool each
+
+All share the eligibility adapter, seller bond and router above; deployed via
+`script/DeployMarkets.s.sol`, each pool seeded with 20k cc + 20k USDC.
+
+| Seller    | Provider | Face   | Maturity   | CommitmentToken                              | TimeDecayHook                                |
+|-----------|----------|--------|------------|----------------------------------------------|----------------------------------------------|
+| Northwind | GCP      | 250k   | 2028-03-15 | `0x3420EFa01699a1de4dC0dEE604617240caDbe77f` | `0x81a7BeA320943CC4A5E0ca28e6eD897Df2700888` |
+| Contoso   | Azure    | 50k    | 2027-06-15 | `0x41bb7fB4183f7e938a88447c82214db1928Ecfa4` | `0x3CAd1C594608066a11Aa8C2659d34ab98965C888` |
+| Globex    | AWS      | 500k   | 2029-03-15 | `0xF6e478CF307B5c6d28a62b41f714031b501051b7` | `0x6245A7700926b7AC830E2867feB4416885A58888` |
+| Initech   | GCP      | 75k    | 2027-02-15 | `0x27baD6953BfB87D9DFf9Aa01034bfBba0b62ae04` | `0x0fE73d39676d1b003Ab745C4fa22B385FeCe4888` |
+| Umbrella  | Azure    | 320k   | 2027-12-15 | `0xe0B6881E5ce7045CA0F6A13644395B12554a96f0` | `0xEA9080489732Af5cCa822d1A317E675d2fA30888` |
+| Hooli     | AWS      | 180k   | 2028-06-15 | `0x816538b12989c84FbC30C22ceBD20F06f312eFE6` | `0x16F624C577A10C622aA8dEE8942e57BA573ec888` |
