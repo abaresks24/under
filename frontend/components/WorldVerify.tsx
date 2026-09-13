@@ -45,9 +45,23 @@ export function WorldVerify({
     setBusy(""); onVerified();
   };
 
+  // Demo shortcut for judges without an Orb / Selfie Check on hand: onboards on-chain without a proof.
+  const demoBypass = async () => {
+    setErr(""); setBusy("Onboarding…");
+    try {
+      const res = await fetch("/api/demo-onboard", {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address }),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.onboarded) throw new Error(d.error ?? "onboarding failed");
+      setBusy(""); onVerified();
+    } catch (e: any) { setBusy(""); setErr(e?.message ?? "failed"); }
+  };
+
   return (
     <>
       <button className={className} onClick={start} disabled={!address || !!busy}>{busy || label}</button>
+      <button className="btn ghost block" style={{ marginTop: 8 }} onClick={demoBypass} disabled={!address || !!busy}>Bypass for the demo (no Orb)</button>
       {ctx && (
         <IDKitRequestWidget
           app_id={world.appId}

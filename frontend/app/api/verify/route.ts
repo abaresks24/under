@@ -7,8 +7,9 @@ import { sepolia } from "viem/chains";
 const RP_ID = process.env.NEXT_PUBLIC_WORLD_RP_ID ?? "rp_e9119ca69759b413";
 const ACTION = process.env.NEXT_PUBLIC_WORLD_ACTION ?? "sell-commitment";
 
-const RESOLVER = "0x0286F6e5939b58Bf895C75826d4286Bf94731Fa4";
-const ADAPTER = "0x97e0c5DF3E110bD57961396E53Eba638D7cbACcA";
+// must match the resolver/adapter the deployed hooks gate on (see lib/config.ts)
+const RESOLVER = "0xD682c2f8C498A3B08C52E7c27891284Ab7A79dAe";
+const ADAPTER = "0x4B909eE2C0c919D18b284177EE2830457E14818A";
 const RPC = process.env.SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";
 
 const resolverAbi = [
