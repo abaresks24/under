@@ -24,10 +24,13 @@ const TABS: { id: Tab; label: string }[] = [
 export default function Page() {
   const [entered, setEntered] = useState(false);
   const [tab, setTab] = useState<Tab>("home");
+  const [openOffer, setOpenOffer] = useState<{ id: string; side: "buy" | "sell" } | null>(null);
 
   if (!entered) return <Landing onEnter={() => { setTab("home"); setEntered(true); }} />;
 
-  const go = (t: Tab) => { setTab(t); if (typeof window !== "undefined") window.scrollTo({ top: 0 }); };
+  const scrollTop = () => { if (typeof window !== "undefined") window.scrollTo({ top: 0 }); };
+  const go = (t: Tab) => { setOpenOffer(null); setTab(t); scrollTop(); };
+  const openMarket = (id: string, side: "buy" | "sell") => { setOpenOffer({ id, side }); setTab("market"); scrollTop(); };
 
   return (
     <div className="wrap">
@@ -44,8 +47,8 @@ export default function Page() {
       </nav>
 
       {tab === "home" && <Home onNavigate={go} />}
-      {tab === "market" && <Market />}
-      {tab === "sell" && <Sell onNavigate={go} />}
+      {tab === "market" && <Market open={openOffer} />}
+      {tab === "sell" && <Sell onNavigate={go} onSell={(id) => openMarket(id, "sell")} />}
       {tab === "portfolio" && <Portfolio onNavigate={go} />}
       {tab === "desk" && (
         <>

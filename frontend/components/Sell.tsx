@@ -1,10 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useAccount } from "wagmi";
-import { metrics } from "@/lib/offers";
+import { useAccount, useReadContracts } from "wagmi";
+import { formatUnits } from "viem";
+import { addr } from "@/lib/config";
+import { tokenAbi, hookAbi } from "@/lib/abis";
+import { OFFERS, metrics } from "@/lib/offers";
 import { addListing, logActivity } from "@/lib/activity";
 import { WorldVerify } from "@/components/WorldVerify";
+import { ProviderMark } from "@/components/Brand";
 
 type Tab = "home" | "market" | "sell" | "portfolio" | "desk";
 
@@ -15,9 +19,61 @@ const CTYPES: Record<string, string[]> = {
 };
 
 const usd = (n: number) => "$" + n.toLocaleString("en-US");
+const usd2 = (n: number) => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+const LIVE = OFFERS.filter((o) => o.live && o.token && o.hook);
 
-export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
+export function Sell({ onNavigate, onSell }: { onNavigate: (t: Tab) => void; onSell: (offerId: string) => void }) {
   const { address, isConnected } = useAccount();
+
+  // holdings across every live market, read in one multicall (same source as the Portfolio)
+  const contracts = useMemo(
+    () => LIVE.flatMap((o) => [
+      { address: o.token!, abi: tokenAbi as any, functionName: "balanceOf", args: [address!] },
+      { address: o.hook!, abi: hookAbi as any, functionName: "currentFactorBips" },
+    ]),
+    [address]
+  );
+  const { data: reads } = useReadContracts({ contracts, query: { enabled: !!address } });
+  const positions = LIVE.map((o, i) => {
+    const bal = Number(formatUnits((reads?.[2 * i]?.result as bigint | undefined) ?? 0n, 6));
+    const factor = Number((reads?.[2 * i + 1]?.result as bigint | undefined) ?? 0n) / 10000;
+    return { offer: o, bal, value: bal * factor };
+  }).filter((p) => p.bal > 0.000001);
+
+  return (
+    <div>
+      <div className="page-head"><div><h1 className="page-title">Sell</h1><p className="page-sub">Sell commitments you already hold, or list a new one for sale.</p></div></div>
+
+      {/* sell what you own */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <h2>Sell what you own</h2>
+        <div className="sub">Your on-chain positions. Sell any of them back to the market for USDC.</div>
+        {!isConnected ? (
+          <div className="notice">Connect your wallet to see your holdings.</div>
+        ) : positions.length === 0 ? (
+          <div className="notice">No commitments yet. <button className="linkbtn" onClick={() => onNavigate("market")}>Buy one in the market →</button> and it shows up here to sell.</div>
+        ) : (
+          <div className="mkt" style={{ marginTop: 4 }}>
+            <div className="mkt-row head" style={{ gridTemplateColumns: "2.2fr 1fr 1fr auto" }}><span>Position</span><span className="mkt-hide-sm">Units</span><span>≈ Value</span><span /></div>
+            {positions.map((p) => (
+              <div className="mkt-row" key={p.offer.id} style={{ cursor: "default", gridTemplateColumns: "2.2fr 1fr 1fr auto" }}>
+                <div className="mkt-asset"><div className="ico"><ProviderMark provider={p.offer.provider} size={18} /></div><div><div className="nm">{p.offer.seller} · cc{p.offer.provider}</div><div className="sub">{p.offer.provider} commitment</div></div></div>
+                <span className="mkt-num mkt-hide-sm">{p.bal.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                <span className="mkt-num">{usd2(p.value)}</span>
+                <span><button className="btn primary" onClick={() => onSell(p.offer.id)}>Sell →</button></span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* list a new commitment */}
+      <ListForm onNavigate={onNavigate} isConnected={isConnected} />
+    </div>
+  );
+}
+
+function ListForm({ onNavigate, isConnected }: { onNavigate: (t: Tab) => void; isConnected: boolean }) {
   const [provider, setProvider] = useState<"AWS" | "GCP" | "Azure">("AWS");
   const [ctype, setCtype] = useState("Savings Plan");
   const [seller, setSeller] = useState("");
@@ -48,27 +104,23 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 
   if (listed) {
     return (
-      <div>
-        <div className="page-head"><div><h1 className="page-title">Listing published</h1><p className="page-sub">Your commitment is now on the market, priced by the v4 hook.</p></div></div>
-        <div className="card" style={{ maxWidth: 560 }}>
-          <div className="state ok" style={{ fontSize: 15 }}>✓ {seller} · {provider} commitment listed</div>
-          <div className="row"><span className="k">Type</span><span className="v">{ctype}</span></div>
-          <div className="row"><span className="k">Face value</span><span className="v">{usd(faceN)}</span></div>
-          <div className="row"><span className="k">Matures</span><span className="v">{new Date(expirySec * 1000).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span></div>
-          {preview && <div className="row"><span className="k">Opening discount</span><span className="v">{preview.discountPct.toFixed(1)}%</span></div>}
-          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <button className="btn primary" onClick={() => onNavigate("market")}>View in market</button>
-            <button className="btn ghost" onClick={() => { setListed(null); setSeller(""); setVerified(false); }}>List another</button>
-          </div>
+      <div className="card" style={{ maxWidth: 560 }}>
+        <div className="state ok" style={{ fontSize: 15 }}>✓ {seller} · {provider} commitment listed</div>
+        <div className="row"><span className="k">Type</span><span className="v">{ctype}</span></div>
+        <div className="row"><span className="k">Face value</span><span className="v">{usd(faceN)}</span></div>
+        <div className="row"><span className="k">Matures</span><span className="v">{new Date(expirySec * 1000).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span></div>
+        {preview && <div className="row"><span className="k">Opening discount</span><span className="v">{preview.discountPct.toFixed(1)}%</span></div>}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          <button className="btn primary" onClick={() => onNavigate("market")}>View in market</button>
+          <button className="btn ghost" onClick={() => { setListed(null); setSeller(""); setVerified(false); }}>List another</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="page-head"><div><h1 className="page-title">List a commitment</h1><p className="page-sub">Turn unused AWS, Google Cloud or Azure capacity into a tradeable position.</p></div></div>
-
+    <>
+      <div className="sect"><span className="num">+</span><h2>List a new commitment</h2></div>
       <div className="sell-grid">
         {/* form */}
         <div className="card">
@@ -137,6 +189,6 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

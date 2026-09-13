@@ -21,7 +21,7 @@ function listingToOffer(l: Listing): Offer {
   return { id: l.id, provider: l.provider as any, seller: l.seller, faceValue: l.faceValue, expiry: l.expiry };
 }
 
-export function Market() {
+export function Market({ open }: { open?: { id: string; side: "buy" | "sell" } | null }) {
   const [now, setNow] = useState(0);
   const [mine, setMine] = useState<Offer[]>([]);
   useEffect(() => {
@@ -35,9 +35,12 @@ export function Market() {
 
   const all = useMemo(() => [...mine, ...OFFERS], [mine]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [initialSide, setInitialSide] = useState<"buy" | "sell">("buy");
+  // deep-link: another tab (Sell / Portfolio) can open a market pre-set to buy or sell
+  useEffect(() => { if (open) { setSelectedId(open.id); setInitialSide(open.side); } }, [open]);
   const selected = all.find((o) => o.id === selectedId) || null;
 
-  if (selected) return <OfferDetail offer={selected} now={now} onBack={() => setSelectedId(null)} />;
+  if (selected) return <OfferDetail offer={selected} now={now} initialSide={initialSide} onBack={() => setSelectedId(null)} />;
   return <MarketList offers={all} now={now} onSelect={setSelectedId} />;
 }
 
@@ -129,10 +132,11 @@ function MarketList({ offers, now, onSelect }: { offers: Offer[]; now: number; o
   );
 }
 
-function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack: () => void }) {
+function OfferDetail({ offer, now, initialSide, onBack }: { offer: Offer; now: number; initialSide: "buy" | "sell"; onBack: () => void }) {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
-  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [side, setSide] = useState<"buy" | "sell">(initialSide);
+  useEffect(() => { setSide(initialSide); }, [initialSide, offer.id]);
   const [amountIn, setAmountIn] = useState("10");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
