@@ -5,16 +5,16 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { addr } from "@/lib/config";
 import { tokenAbi, erc20Abi, hookAbi, adapterAbi, routerAbi } from "@/lib/abis";
-import { buildBuy } from "@/lib/pool";
+import { buildBuyFor } from "@/lib/pool";
 import { OFFERS, metrics, type Offer } from "@/lib/offers";
 import { getListings, logActivity, type Listing } from "@/lib/activity";
 import { ValueCurve } from "@/components/ValueCurve";
 import { WorldVerify } from "@/components/WorldVerify";
+import { ProviderMark } from "@/components/Brand";
 
 const f6 = (v?: bigint) => (v != null ? Number(formatUnits(v, 6)).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—");
 const usd = (n: number) => "$" + n.toLocaleString("en-US");
 const mmm = (ts: number) => new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-const ico = (p: string) => (p === "Azure" ? "AZ" : p);
 
 // user-created listings (from the Sell tab) surface in the market as extra offers
 function listingToOffer(l: Listing): Offer {
@@ -106,7 +106,7 @@ function MarketList({ offers, now, onSelect }: { offers: Offer[]; now: number; o
           return (
             <button className="offer-card" key={o.id} onClick={() => onSelect(o.id)}>
               <div className="oc-top">
-                <div className="oc-ico">{ico(o.provider)}</div>
+                <div className="oc-ico"><ProviderMark provider={o.provider} /></div>
                 {o.live ? <span className="mkt-tag live">Live</span> : <span className="mkt-tag preview">Listed</span>}
               </div>
               <div className="oc-title">{o.seller}</div>
@@ -137,12 +137,14 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
   const [err, setErr] = useState("");
   const [tx, setTx] = useState<`0x${string}` | undefined>();
   const live = !!offer.live;
+  const tok = (offer.token ?? addr.token) as `0x${string}`;
+  const hk = (offer.hook ?? addr.hook) as `0x${string}`;
   const q = { enabled: live && !!address };
 
   const { data: eligible, refetch: rEl } = useReadContract({ address: addr.adapter, abi: adapterAbi, functionName: "isEligible", args: [address!], query: q });
-  const { data: factorB } = useReadContract({ address: addr.hook, abi: hookAbi, functionName: "currentFactorBips", query: { enabled: live } });
-  const { data: onchainExpiry } = useReadContract({ address: addr.token, abi: tokenAbi, functionName: "expiry", query: { enabled: live } });
-  const { data: acme, refetch: rA } = useReadContract({ address: addr.token, abi: tokenAbi, functionName: "balanceOf", args: [address!], query: q });
+  const { data: factorB } = useReadContract({ address: hk, abi: hookAbi, functionName: "currentFactorBips", query: { enabled: live } });
+  const { data: onchainExpiry } = useReadContract({ address: tok, abi: tokenAbi, functionName: "expiry", query: { enabled: live } });
+  const { data: acme, refetch: rA } = useReadContract({ address: tok, abi: tokenAbi, functionName: "balanceOf", args: [address!], query: q });
   const { data: usdc, refetch: rU } = useReadContract({ address: addr.usdc, abi: erc20Abi, functionName: "balanceOf", args: [address!], query: q });
   const { data: allow, refetch: rAllow } = useReadContract({ address: addr.usdc, abi: erc20Abi, functionName: "allowance", args: [address!, addr.router], query: q });
 
@@ -165,7 +167,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
   const faucet = () => run("Minting test USDC", () => writeContractAsync({ address: addr.usdc, abi: erc20Abi, functionName: "mint", args: [address!, parseUnits("10000", 6)] }));
   const approve = () => run("Approving", () => writeContractAsync({ address: addr.usdc, abi: erc20Abi, functionName: "approve", args: [addr.router, maxUint256] }));
   const buy = async () => {
-    const h = await run("Buying", () => writeContractAsync({ address: addr.router, abi: routerAbi, functionName: "swap", args: buildBuy(parseUnits(usdcIn || "0", 6)) as any }));
+    const h = await run("Buying", () => writeContractAsync({ address: addr.router, abi: routerAbi, functionName: "swap", args: buildBuyFor(tok, hk, parseUnits(usdcIn || "0", 6)) as any }));
     if (h) logActivity({ id: h, kind: "buy", provider: offer.provider, label: `${offer.seller} · cc${offer.provider}`, amountUsd: Number(usdcIn || "0"), faceValue: offer.faceValue, tx: h, ts: Math.floor(Date.now() / 1000) });
   };
 
@@ -185,7 +187,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
 
       <div className="market-head" style={{ marginTop: 16 }}>
         <div className="asset">
-          <div className="ico">{ico(offer.provider)}</div>
+          <div className="ico"><ProviderMark provider={offer.provider} size={26} /></div>
           <div>
             <div className="name">{offer.seller} — {offer.provider} commitment</div>
             <div className="meta">cc{offer.provider} · matures {mmm(expiry)} {live && <span className="mkt-tag live" style={{ marginLeft: 6 }}>Live</span>}</div>
@@ -227,7 +229,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
               </div>
               <div className="field">
                 <div className="top"><span>You receive (est.)</span><span className="mono">Balance {f6(acme as bigint)}</span></div>
-                <div className="mid"><span className="est">≈ {est}</span><span className="chip-token"><span className="coin" style={{ background: "var(--ink)" }}>A</span>ccAWS</span></div>
+                <div className="mid"><span className="est">≈ {est}</span><span className="chip-token"><span className="coin" style={{ background: "var(--ink)" }}>{offer.provider[0]}</span>cc{offer.provider}</span></div>
               </div>
 
               {!isConnected ? (

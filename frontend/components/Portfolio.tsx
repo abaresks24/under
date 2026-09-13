@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useEffect, useMemo, useState } from "react";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { addr } from "@/lib/config";
 import { tokenAbi, erc20Abi, hookAbi, adapterAbi } from "@/lib/abis";
+import { OFFERS } from "@/lib/offers";
 import { getActivity, getListings, type Activity, type Listing } from "@/lib/activity";
+import { ProviderMark } from "@/components/Brand";
 
 type Tab = "home" | "market" | "sell" | "portfolio" | "desk";
 
 const usd = (n: number) => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 const num = (v?: bigint) => (v != null ? Number(formatUnits(v, 6)) : 0);
 const when = (ts: number) => new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+const LIVE = OFFERS.filter((o) => o.live && o.token && o.hook);
 
 export function Portfolio({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   const { address, isConnected } = useAccount();
@@ -25,15 +29,27 @@ export function Portfolio({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   }, []);
 
   const q = { enabled: !!address };
-  const { data: acme } = useReadContract({ address: addr.token, abi: tokenAbi, functionName: "balanceOf", args: [address!], query: q });
   const { data: usdc } = useReadContract({ address: addr.usdc, abi: erc20Abi, functionName: "balanceOf", args: [address!], query: q });
-  const { data: factorB } = useReadContract({ address: addr.hook, abi: hookAbi, functionName: "currentFactorBips", query: { enabled: isConnected } });
   const { data: eligible } = useReadContract({ address: addr.adapter, abi: adapterAbi, functionName: "isEligible", args: [address!], query: q });
 
-  const ccBal = num(acme as bigint);           // ccAWS units (≈ $1 face each at maturity)
-  const factor = factorB != null ? Number(factorB) / 10000 : 0;
-  const marketValue = ccBal * factor;          // what it's worth on the market today
-  const faceAtMaturity = ccBal;                // $1 per unit if consumed before expiry
+  // balance + live factor for every market, in one multicall
+  const contracts = useMemo(
+    () => LIVE.flatMap((o) => [
+      { address: o.token!, abi: tokenAbi as any, functionName: "balanceOf", args: [address!] },
+      { address: o.hook!, abi: hookAbi as any, functionName: "currentFactorBips" },
+    ]),
+    [address]
+  );
+  const { data: reads } = useReadContracts({ contracts, query: { enabled: !!address } });
+
+  const positions = LIVE.map((o, i) => {
+    const bal = num(reads?.[2 * i]?.result as bigint | undefined);
+    const factor = Number((reads?.[2 * i + 1]?.result as bigint | undefined) ?? 0n) / 10000;
+    return { offer: o, bal, factor, market: bal * factor };
+  }).filter((p) => p.bal > 0.000001);
+
+  const marketValue = positions.reduce((s, p) => s + p.market, 0);
+  const faceAtMaturity = positions.reduce((s, p) => s + p.bal, 0);
   const upside = Math.max(0, faceAtMaturity - marketValue);
   const invested = acts.filter((a) => a.kind === "buy").reduce((s, a) => s + (a.amountUsd || 0), 0);
 
@@ -65,16 +81,18 @@ export function Portfolio({ onNavigate }: { onNavigate: (t: Tab) => void }) {
       <div className="card" style={{ marginTop: 20 }}>
         <h2>Holdings</h2>
         <div className="sub">On-chain positions read live from Sepolia.</div>
-        {ccBal > 0 ? (
+        {positions.length > 0 ? (
           <div className="mkt" style={{ marginTop: 4 }}>
-            <div className="mkt-row head"><span>Position</span><span className="mkt-hide-sm">Units</span><span className="mkt-hide-sm">Price</span><span>Market value</span><span>At maturity</span></div>
-            <div className="mkt-row" style={{ cursor: "default", gridTemplateColumns: "2.2fr 1fr 1fr 1fr 1fr" }}>
-              <div className="mkt-asset"><div className="ico">AWS</div><div><div className="nm">Acme Corp · ccAWS</div><div className="sub">AWS commitment</div></div></div>
-              <span className="mkt-num mkt-hide-sm">{ccBal.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
-              <span className="mkt-num mkt-hide-sm">${factor.toFixed(3)}</span>
-              <span className="mkt-num">{usd(marketValue)}</span>
-              <span className="mkt-num" style={{ fontWeight: 600 }}>{usd(faceAtMaturity)}</span>
-            </div>
+            <div className="mkt-row head" style={{ gridTemplateColumns: "2.2fr 1fr 1fr 1fr 1fr" }}><span>Position</span><span className="mkt-hide-sm">Units</span><span className="mkt-hide-sm">Price</span><span>Market value</span><span>At maturity</span></div>
+            {positions.map((p) => (
+              <div className="mkt-row" key={p.offer.id} style={{ cursor: "default", gridTemplateColumns: "2.2fr 1fr 1fr 1fr 1fr" }}>
+                <div className="mkt-asset"><div className="ico"><ProviderMark provider={p.offer.provider} size={18} /></div><div><div className="nm">{p.offer.seller} · cc{p.offer.provider}</div><div className="sub">{p.offer.provider} commitment</div></div></div>
+                <span className="mkt-num mkt-hide-sm">{p.bal.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span>
+                <span className="mkt-num mkt-hide-sm">${p.factor.toFixed(3)}</span>
+                <span className="mkt-num">{usd(p.market)}</span>
+                <span className="mkt-num" style={{ fontWeight: 600 }}>{usd(p.bal)}</span>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="notice">No positions yet. <button className="linkbtn" onClick={() => onNavigate("market")}>Buy a commitment →</button></div>

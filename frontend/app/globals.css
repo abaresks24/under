@@ -1,15 +1,15 @@
-@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@400,500,600,700&display=swap');
 
 :root {
-  --bg: #FBFAF6;        /* warm paper */
+  --bg: #ECE5D3;        /* warm beige paper */
   --panel: #FFFFFF;
-  --soft: #F3F2EA;
-  --line: #E7E4D9;
-  --line-2: #D7D3C6;
+  --soft: #E7DFCB;
+  --line: #DBD1BA;
+  --line-2: #C9BFA4;
   --ink: #1B1C16;       /* warm near-black — text + neutral marks */
-  --text: #262820;
-  --muted: #6E6F62;
-  --faint: #9C9C8E;
+  --text: #2A2A20;
+  --muted: #6C6A58;
+  --faint: #948E78;
   --accent: #14150F;    /* monochrome — the DA is driven by the black UNDER wordmark */
   --accent-deep: #000000;
   --good: #14150F;      /* positive shown in ink, not colour */
@@ -17,6 +17,7 @@
   --bad: #B23B2E;
   --r: 18px;
   --font: 'General Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: 'Clash Display', 'General Sans', ui-sans-serif, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 body {
@@ -30,7 +31,13 @@ body {
 }
 .mono, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
 a { color: var(--accent); text-decoration: none; }
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); font-family: var(--font-display); }
+
+/* the wordmark's typeface (Clash Display) across the design-forward surfaces */
+.tab, .btn, .chip-token,
+.page-title, .dash-hero h1, .stat b, .tile .n, .maturity .big, .oc-metrics .v.big,
+.land-hero h1, .hero-copy h1, .doc-title, .pres-sec h2, .cta-band h2, .land-stats b,
+.asset .name { font-family: var(--font-display); }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px 96px; }
 
@@ -85,7 +92,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; color: var(--
 .hero-nav { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
 .hero-nav .brand { color: #fff; }
 .hero-nav .logo { background: #fff; color: #0c1a23; }
-.hero-nav-right { display: flex; align-items: center; gap: 22px; }
+.hero-nav-right { display: flex; align-items: center; gap: 22px; margin-right: -8px; }
 .hero-link { color: rgba(255,255,255,.82); font-size: 15px; font-weight: 500; }
 .hero-link:hover { color: #fff; }
 .hero-copy { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 40px; }
