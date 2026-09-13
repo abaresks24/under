@@ -54,7 +54,7 @@ export function WorldVerify({
           action={world.action}
           rp_context={ctx}
           allow_legacy_proofs={false}
-          environment="sandbox"
+          environment="production"
           preset={selfieCheckLegacy({ signal: address ?? "" })}
           open={open}
           onOpenChange={setOpen}
