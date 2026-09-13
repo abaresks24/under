@@ -49,7 +49,7 @@ export default function Page() {
       {tab === "portfolio" && <Portfolio onNavigate={go} />}
       {tab === "desk" && (
         <>
-          <div className="page-head" style={{ marginBottom: 8 }}><div><h1 className="page-title">Compliance desk</h1><p className="page-sub">Issue and revoke seller eligibility — the ENSv2 credential layer.</p></div></div>
+          <div className="page-head" style={{ marginBottom: 8 }}><div><h1 className="page-title">Compliance desk</h1><p className="page-sub">Turn a seller's right to trade on or off. This is the ENSv2 credential layer.</p></div></div>
           <Desk />
         </>
       )}

@@ -53,8 +53,8 @@ export function ValueCurve({ faceValue, expiry }: { faceValue: number; expiry: n
         </text>
       </svg>
       <p className="notice">
-        Value converges to zero at expiry: a buyer needs time to consume the credit, so the closer to
-        expiry, the less it is worth. The pool prices this <b>mechanically</b> via the v4 hook.
+        The value falls to zero at the deadline. A buyer needs time to actually spend the credit, so the
+        closer that date gets, the less it's worth. The v4 hook does this pricing for you.
       </p>
     </div>
   );

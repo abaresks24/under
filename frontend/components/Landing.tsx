@@ -35,9 +35,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <main className="hero-copy">
             <h1>Unused cloud commitments, made liquid.</h1>
             <p>
-              Companies pre-pay years of AWS, Google Cloud and Azure to unlock discounts — then leave
-              much of it unused. Under is where they resell that capacity, priced by the time
-              left to consume the credit.
+              Companies pay years of AWS, Google Cloud and Azure up front for a discount, then never use
+              all of it. Under is where they sell what's left, at a price that follows the time still on
+              the clock to spend it.
             </p>
             <div className="hero-cta">
               <button className="btn on-video lg" onClick={onEnter}>Launch app</button>
@@ -53,53 +53,53 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <div className="pres-eyebrow">The protocol</div>
           <h2>A market for capacity that would otherwise expire.</h2>
           <p className="lead">
-            A cloud commitment isn't a fixed sum — it's worth less the closer it gets to expiry, because
-            there's less time to consume it, and nothing at all once it lapses. Under turns that
-            wasting asset into something a company can sell today, and another can buy at a discount.
+            A cloud commitment isn't worth a fixed amount. It's worth less the closer it gets to the
+            deadline, because there's less time left to spend it, and nothing once that day passes. Under
+            turns that into something one company can sell today and another can buy at a discount.
           </p>
         </section>
 
         <section className="pres-sec">
           <div className="pres-eyebrow">How it works</div>
-          <h2>Sell, price, buy — on-chain.</h2>
+          <h2>Sell, price, buy. On-chain.</h2>
           <div className="steps">
             <div className="step">
-              <div className="no">01 — List</div>
-              <h3>Tokenize what you won't use</h3>
-              <p>A verified seller tokenizes their commitment. It goes on the market instantly, no OTC deal, no waiting.</p>
+              <div className="no">01 List</div>
+              <h3>Put up what you won't use</h3>
+              <p>A verified seller lists their commitment and it's on the market right away. No broker, no waiting for a counterparty.</p>
             </div>
             <div className="step">
-              <div className="no">02 — Price</div>
-              <h3>The discount tracks maturity</h3>
-              <p>A Uniswap v4 hook sets the price from the time left to consume the credit — the discount widens mechanically as expiry nears.</p>
+              <div className="no">02 Price</div>
+              <h3>The discount follows the clock</h3>
+              <p>A Uniswap v4 hook reads how long is left to spend the credit and sets the price. As the deadline gets closer, the discount grows.</p>
             </div>
             <div className="step">
-              <div className="no">03 — Buy</div>
-              <h3>Acquire capacity below face value</h3>
-              <p>A verified buyer picks it up at a discount and captures it if they consume the credit before it expires.</p>
+              <div className="no">03 Buy</div>
+              <h3>Get capacity below face value</h3>
+              <p>A verified buyer picks it up cheap and keeps the difference by using the credit before it runs out.</p>
             </div>
           </div>
         </section>
 
         <section className="pres-sec">
-          <div className="pres-eyebrow">Trust, minimized in layers</div>
-          <h2>Verified sellers. Real skin in the game.</h2>
+          <div className="pres-eyebrow">Why you can trust it</div>
+          <h2>Real sellers, with something to lose.</h2>
           <p className="lead">
-            It's a real-world claim, so the market can't be anonymous — it has to be able to remove bad
-            actors and make buyers whole. Three layers do that.
+            This is a claim on the real world, so the market can't just be anonymous. It has to be able
+            to remove bad actors and make buyers whole. Three things make that possible.
           </p>
           <div className="feat-grid">
             <div className="feat">
-              <h3>Proof of human</h3>
-              <p>World Selfie Check proves a real person authorizes the sale — an anti-fraud signal, not KYC.</p>
+              <h3>A real person behind each sale</h3>
+              <p>World Selfie Check confirms there's a human on the other side. It's there to stop fraud, and it isn't KYC.</p>
             </div>
             <div className="feat">
-              <h3>Revocable identity</h3>
-              <p>Eligibility is an ENS credential a delegated compliance role can revoke live — without ever moving the name.</p>
+              <h3>Access that can be pulled</h3>
+              <p>A seller's right to trade lives in an ENS record. Compliance can switch it off on the spot, and the name never has to move.</p>
             </div>
             <div className="feat">
-              <h3>Collateral bond</h3>
-              <p>Sellers post a bond that is slashed to a compensation pool on fraud, so a buyer is made whole on-chain.</p>
+              <h3>Money on the line</h3>
+              <p>Every seller posts a bond. If they cheat, it's taken and paid out to the buyer, right on-chain.</p>
             </div>
           </div>
         </section>
@@ -107,15 +107,15 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         <section className="pres-sec">
           <div className="pres-eyebrow">Built on</div>
           <div className="builton">
-            <span>Uniswap v4 <i>· the time-decay hook</i></span>
-            <span>ENSv2 <i>· portable, revocable identity</i></span>
-            <span>World <i>· proof of human</i></span>
+            <span>Uniswap v4 <i>· the time decay hook</i></span>
+            <span>ENSv2 <i>· identity you can revoke</i></span>
+            <span>World <i>· a real person</i></span>
           </div>
         </section>
 
         <section className="cta-band">
           <h2>See what's on the market.</h2>
-          <p>Browse the live commitment, its discount, and the maturity curve.</p>
+          <p>Browse the live commitments, their discounts and the value curve.</p>
           <div className="home-cta">
             <button className="btn primary lg" onClick={onEnter}>Launch app</button>
             <Link className="btn lg" href="/docs">Read the docs</Link>

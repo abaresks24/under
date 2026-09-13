@@ -12,7 +12,7 @@ import { ValueCurve } from "@/components/ValueCurve";
 import { WorldVerify } from "@/components/WorldVerify";
 import { ProviderMark } from "@/components/Brand";
 
-const f6 = (v?: bigint) => (v != null ? Number(formatUnits(v, 6)).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—");
+const f6 = (v?: bigint) => (v != null ? Number(formatUnits(v, 6)).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "…");
 const usd = (n: number) => "$" + n.toLocaleString("en-US");
 const mmm = (ts: number) => new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
@@ -112,12 +112,12 @@ function MarketList({ offers, now, onSelect }: { offers: Offer[]; now: number; o
               <div className="oc-title">{o.seller}</div>
               <div className="oc-sub">{o.provider} · cc{o.provider} · matures {mmm(o.expiry)}</div>
               <div className="oc-metrics">
-                <div><span className="l">Discount</span><span className="v big">{now ? `${m.discountPct.toFixed(1)}%` : "—"}</span></div>
-                <div><span className="l">Price / $1</span><span className="v">{now ? `$${m.price.toFixed(3)}` : "—"}</span></div>
+                <div><span className="l">Discount</span><span className="v big">{now ? `${m.discountPct.toFixed(1)}%` : "…"}</span></div>
+                <div><span className="l">Price / $1</span><span className="v">{now ? `$${m.price.toFixed(3)}` : "…"}</span></div>
               </div>
               <div className="oc-foot">
                 <div><span className="l">Face value</span><span>{usd(o.faceValue)}</span></div>
-                <div><span className="l">Matures in</span><span>{now ? `${m.monthsLeft.toFixed(0)} mo` : "—"}</span></div>
+                <div><span className="l">Matures in</span><span>{now ? `${m.monthsLeft.toFixed(0)} mo` : "…"}</span></div>
               </div>
               <div className="oc-cta">View market →</div>
             </button>
@@ -154,7 +154,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
   const factor01 = live && factorB != null ? Number(factorB) / 10000 : m.factor;
   const price = factor01.toFixed(3);
   const discount = ((1 - factor01) * 100).toFixed(1);
-  const est = factor01 > 0 ? (Number(usdcIn || "0") / factor01).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—";
+  const est = factor01 > 0 ? (Number(usdcIn || "0") / factor01).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "…";
   const approved = (allow as bigint | undefined) ? (allow as bigint) > 0n : false;
 
   const refresh = () => { rEl(); rA(); rU(); rAllow(); };
@@ -189,11 +189,11 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
         <div className="asset">
           <div className="ico"><ProviderMark provider={offer.provider} size={26} /></div>
           <div>
-            <div className="name">{offer.seller} — {offer.provider} commitment</div>
+            <div className="name">{offer.seller} {offer.provider} commitment</div>
             <div className="meta">cc{offer.provider} · matures {mmm(expiry)} {live && <span className="mkt-tag live" style={{ marginLeft: 6 }}>Live</span>}</div>
           </div>
         </div>
-        <div className="maturity"><div className="lbl">Matures in</div><div className="big">{now ? `${m.monthsLeft.toFixed(0)} mo` : "—"}</div></div>
+        <div className="maturity"><div className="lbl">Matures in</div><div className="big">{now ? `${m.monthsLeft.toFixed(0)} mo` : "…"}</div></div>
       </div>
 
       <div className="grid">

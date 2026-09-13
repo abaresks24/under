@@ -49,7 +49,7 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   if (listed) {
     return (
       <div>
-        <div className="page-head"><div><h1 className="page-title">Listing published</h1><p className="page-sub">Your commitment is now on the market, priced by the v4 time-decay hook.</p></div></div>
+        <div className="page-head"><div><h1 className="page-title">Listing published</h1><p className="page-sub">Your commitment is now on the market, priced by the v4 hook.</p></div></div>
         <div className="card" style={{ maxWidth: 560 }}>
           <div className="state ok" style={{ fontSize: 15 }}>✓ {seller} · {provider} commitment listed</div>
           <div className="row"><span className="k">Type</span><span className="v">{ctype}</span></div>
@@ -73,7 +73,7 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         {/* form */}
         <div className="card">
           <h2>Commitment details</h2>
-          <div className="sub">Describe what you're selling — the market prices it from its maturity.</div>
+          <div className="sub">Tell buyers what you're selling. The market sets the price from the maturity date.</div>
 
           <div className="form-row">
             <div>
@@ -113,10 +113,10 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
           <h2>Listing preview</h2>
           <div className="sub">How the hook prices it today.</div>
           <div className="tiles" style={{ gridTemplateColumns: "1fr 1fr" }}>
-            <div className="tile"><div className="l">Opening discount</div><div className="n good">{preview ? `${preview.discountPct.toFixed(1)}%` : "—"}</div><div className="s">to face value</div></div>
-            <div className="tile"><div className="l">Price / $1</div><div className="n">{preview ? `$${preview.price.toFixed(3)}` : "—"}</div><div className="s">USDC per $1 face</div></div>
-            <div className="tile"><div className="l">Est. proceeds</div><div className="n">{preview ? usd(Math.round(preview.proceeds)) : "—"}</div><div className="s">if fully sold now</div></div>
-            <div className="tile"><div className="l">Matures in</div><div className="n">{preview ? `${preview.monthsLeft.toFixed(0)} mo` : "—"}</div><div className="s">then worthless</div></div>
+            <div className="tile"><div className="l">Opening discount</div><div className="n good">{preview ? `${preview.discountPct.toFixed(1)}%` : "…"}</div><div className="s">to face value</div></div>
+            <div className="tile"><div className="l">Price / $1</div><div className="n">{preview ? `$${preview.price.toFixed(3)}` : "…"}</div><div className="s">USDC per $1 face</div></div>
+            <div className="tile"><div className="l">Est. proceeds</div><div className="n">{preview ? usd(Math.round(preview.proceeds)) : "…"}</div><div className="s">if fully sold now</div></div>
+            <div className="tile"><div className="l">Matures in</div><div className="n">{preview ? `${preview.monthsLeft.toFixed(0)} mo` : "…"}</div><div className="s">then worthless</div></div>
           </div>
 
           <div style={{ marginTop: 16 }}>
@@ -124,7 +124,7 @@ export function Sell({ onNavigate }: { onNavigate: (t: Tab) => void }) {
               <button className="btn primary block lg" disabled>Connect wallet to list</button>
             ) : !verified ? (
               <>
-                <div className="notice" style={{ marginBottom: 10 }}>Sellers verify with World Selfie Check first — proof a real human authorizes the sale.</div>
+                <div className="notice" style={{ marginBottom: 10 }}>Sellers verify with World Selfie Check first, to confirm a real person is behind the sale.</div>
                 <WorldVerify onVerified={() => setVerified(true)} label="Verify with World ID to list" />
               </>
             ) : (

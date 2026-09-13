@@ -68,12 +68,12 @@ export function Desk() {
 
       <div className="card">
         <h2>Revoke / reactivate</h2>
-        <div className="sub">Flips commitment.status only — the ENS name is never moved (EAC).</div>
+        <div className="sub">Flips commitment.status only. The ENS name never moves (EAC).</div>
         <label>Address</label>
         <input value={target} onChange={(e) => setTarget(e.target.value.trim())} placeholder="0x…" />
         {targetOk && (
           <>
-            <div className="row"><span className="k">Status</span><span className="v">{bound ? (status as string) || "—" : "unregistered"}</span></div>
+            <div className="row"><span className="k">Status</span><span className="v">{bound ? (status as string) || "…" : "unregistered"}</span></div>
             <div className="row"><span className="k">Eligible</span><span className="v">{eligible ? <span className="state ok">Yes</span> : <span className="state bad">No</span>}</span></div>
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button className="btn danger" onClick={() => setStatus("revoked")} disabled={!!busy}>Revoke</button>

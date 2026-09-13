@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Under — secondary market for cloud commitments",
+  title: "Under, the secondary market for cloud commitments",
   description:
-    "Resell unconsumed cloud spend commitments on a Uniswap v4 pool whose price decays with time to expiry. Sellers verified via ENSv2 + World Selfie Check.",
+    "Sell the cloud spend you won't use on a Uniswap v4 pool whose price follows the time left to spend it. Sellers are verified with ENSv2 and World Selfie Check.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
