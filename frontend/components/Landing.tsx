@@ -29,9 +29,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <nav className="hero-nav">
             <div className="brand"><Logo light height={20} /></div>
             <div className="hero-nav-right">
-              <Link className="hero-link" href="/docs">Docs</Link>
               <ConnectButton onVideo />
-              <button className="btn on-video" onClick={onEnter}>Launch app</button>
             </div>
           </nav>
           <main className="hero-copy">
