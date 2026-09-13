@@ -1,15 +1,27 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Brand";
+import { ConnectButton } from "@/components/ConnectButton";
 
 export function Landing({ onEnter }: { onEnter: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) {
+      v.muted = true; // ensure the muted PROPERTY is set so browsers allow autoplay
+      const p = v.play();
+      if (p) p.catch(() => {});
+    }
+  }, []);
+
   return (
     <>
       {/* cinematic city hero */}
       <div className="video-hero">
-        <video className="hero-video" autoPlay muted loop playsInline preload="auto">
+        <video ref={videoRef} className="hero-video" autoPlay muted loop playsInline preload="auto">
           <source src="/hero.mp4" type="video/mp4" />
         </video>
         <div className="hero-overlay" />
@@ -18,6 +30,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             <div className="brand"><Logo light height={20} /></div>
             <div className="hero-nav-right">
               <Link className="hero-link" href="/docs">Docs</Link>
+              <ConnectButton onVideo />
               <button className="btn on-video" onClick={onEnter}>Launch app</button>
             </div>
           </nav>
