@@ -5,7 +5,7 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { addr, USDC_FAUCET } from "@/lib/config";
 import { tokenAbi, erc20Abi, hookAbi, adapterAbi, routerAbi } from "@/lib/abis";
-import { buildBuyFor } from "@/lib/pool";
+import { buildBuyFor, buildSellFor } from "@/lib/pool";
 import { OFFERS, metrics, type Offer } from "@/lib/offers";
 import { getListings, logActivity, type Listing } from "@/lib/activity";
 import { ValueCurve } from "@/components/ValueCurve";
@@ -132,7 +132,8 @@ function MarketList({ offers, now, onSelect }: { offers: Offer[]; now: number; o
 function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack: () => void }) {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
-  const [usdcIn, setUsdcIn] = useState("10");
+  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [amountIn, setAmountIn] = useState("10");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const [tx, setTx] = useState<`0x${string}` | undefined>();
@@ -147,6 +148,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
   const { data: acme, refetch: rA } = useReadContract({ address: tok, abi: tokenAbi, functionName: "balanceOf", args: [address!], query: q });
   const { data: usdc, refetch: rU } = useReadContract({ address: addr.usdc, abi: erc20Abi, functionName: "balanceOf", args: [address!], query: q });
   const { data: allow, refetch: rAllow } = useReadContract({ address: addr.usdc, abi: erc20Abi, functionName: "allowance", args: [address!, addr.router], query: q });
+  const { data: allowTok, refetch: rAllowTok } = useReadContract({ address: tok, abi: erc20Abi, functionName: "allowance", args: [address!, addr.router], query: q });
 
   const nowS = now || Math.floor(Date.now() / 1000);
   const expiry = live && onchainExpiry ? Number(onchainExpiry) : offer.expiry;
@@ -154,21 +156,29 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
   const factor01 = live && factorB != null ? Number(factorB) / 10000 : m.factor;
   const price = factor01.toFixed(3);
   const discount = ((1 - factor01) * 100).toFixed(1);
-  const est = factor01 > 0 ? (Number(usdcIn || "0") / factor01).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "…";
-  const approved = (allow as bigint | undefined) ? (allow as bigint) > 0n : false;
+  const amtNum = Number(amountIn || "0");
+  // buy: USDC in -> tokens out (amt / price). sell: tokens in -> USDC out (amt * price).
+  const estNum = side === "buy" ? (factor01 > 0 ? amtNum / factor01 : 0) : amtNum * factor01;
+  const est = estNum > 0 ? estNum.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "…";
+  const usdcApproved = (allow as bigint | undefined) ? (allow as bigint) > 0n : false;
+  const tokApproved = (allowTok as bigint | undefined) ? (allowTok as bigint) > 0n : false;
+  const approved = side === "buy" ? usdcApproved : tokApproved;
 
-  const refresh = () => { rEl(); rA(); rU(); rAllow(); };
+  const refresh = () => { rEl(); rA(); rU(); rAllow(); rAllowTok(); };
   const run = async (label: string, fn: () => Promise<`0x${string}`>) => {
     setErr(""); setBusy(label);
     try { const h = await fn(); setTx(h); await new Promise((r) => setTimeout(r, 1800)); refresh(); return h; }
     catch (e: any) { setErr(e?.shortMessage ?? e?.message ?? "transaction failed"); return undefined; }
     finally { setBusy(""); }
   };
-  const approve = () => run("Approving", () => writeContractAsync({ address: addr.usdc, abi: erc20Abi, functionName: "approve", args: [addr.router, maxUint256] }));
-  const buy = async () => {
-    const h = await run("Buying", () => writeContractAsync({ address: addr.router, abi: routerAbi, functionName: "swap", args: buildBuyFor(tok, hk, parseUnits(usdcIn || "0", 6)) as any }));
-    if (h) logActivity({ id: h, kind: "buy", provider: offer.provider, label: `${offer.seller} · cc${offer.provider}`, amountUsd: Number(usdcIn || "0"), faceValue: offer.faceValue, tx: h, ts: Math.floor(Date.now() / 1000) });
+  const approve = () => run("Approving", () => writeContractAsync({ address: (side === "buy" ? addr.usdc : tok) as `0x${string}`, abi: erc20Abi, functionName: "approve", args: [addr.router, maxUint256] }));
+  const trade = async () => {
+    const amt = parseUnits(amountIn || "0", 6);
+    const h = await run(side === "buy" ? "Buying" : "Selling", () =>
+      writeContractAsync({ address: addr.router, abi: routerAbi, functionName: "swap", args: (side === "buy" ? buildBuyFor(tok, hk, amt) : buildSellFor(tok, hk, amt)) as any }));
+    if (h) logActivity({ id: h, kind: side, provider: offer.provider, label: `${offer.seller} · cc${offer.provider}`, amountUsd: side === "buy" ? amtNum : estNum, faceValue: offer.faceValue, tx: h, ts: Math.floor(Date.now() / 1000) });
   };
+  const flip = () => { setSide((s) => (s === "buy" ? "sell" : "buy")); setAmountIn("10"); setErr(""); };
 
   // After World verification the desk onboards the address on-chain; poll until eligibility lands.
   const pollEligible = () => {
@@ -213,38 +223,51 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
         </div>
 
         <div className="card" style={{ position: "sticky", top: 84 }}>
-          <h2>Buy</h2>
+          <h2>{side === "buy" ? "Buy" : "Sell"}</h2>
           {!live ? (
             <>
               <div className="sub">Listed commitment</div>
-              <div className="notice">This commitment isn't settling on Sepolia yet. Open the <b>Acme · AWS</b> market to run the full on-chain buy flow.</div>
+              <div className="notice">This commitment isn't settling on Sepolia yet. Open a live market to run the full on-chain trade flow.</div>
             </>
           ) : (
             <>
-              <div className="sub">Buy cc{offer.provider} with USDC · verified buyers only.</div>
-              <div className="field">
-                <div className="top"><span>You pay</span><span className="mono">Balance {f6(usdc as bigint)}</span></div>
-                <div className="mid"><input value={usdcIn} onChange={(e) => setUsdcIn(e.target.value)} inputMode="decimal" placeholder="0.0" /><span className="chip-token"><span className="coin" style={{ background: "var(--muted)" }}>$</span>USDC</span></div>
-              </div>
-              <div className="field">
-                <div className="top"><span>You receive (est.)</span><span className="mono">Balance {f6(acme as bigint)}</span></div>
-                <div className="mid"><span className="est">≈ {est}</span><span className="chip-token"><span className="coin" style={{ background: "var(--ink)" }}>{offer.provider[0]}</span>cc{offer.provider}</span></div>
-              </div>
+              <div className="sub">{side === "buy" ? `Buy cc${offer.provider} with USDC` : `Sell cc${offer.provider} for USDC`} · verified only.</div>
+
+              {(() => {
+                const usdcChip = <span className="chip-token"><span className="coin" style={{ background: "var(--muted)" }}>$</span>USDC</span>;
+                const ccChip = <span className="chip-token"><span className="coin" style={{ background: "var(--ink)" }}>{offer.provider[0]}</span>cc{offer.provider}</span>;
+                const payBal = side === "buy" ? f6(usdc as bigint) : f6(acme as bigint);
+                const recvBal = side === "buy" ? f6(acme as bigint) : f6(usdc as bigint);
+                return (
+                  <>
+                    <div className="field">
+                      <div className="top"><span>You pay</span><span className="mono">Balance {payBal}</span></div>
+                      <div className="mid"><input value={amountIn} onChange={(e) => setAmountIn(e.target.value)} inputMode="decimal" placeholder="0.0" />{side === "buy" ? usdcChip : ccChip}</div>
+                    </div>
+                    <div className="flip-row"><button className="flip-btn" onClick={flip} title="Switch buy / sell" aria-label="Switch buy or sell">↑↓</button></div>
+                    <div className="field">
+                      <div className="top"><span>You receive (est.)</span><span className="mono">Balance {recvBal}</span></div>
+                      <div className="mid"><span className="est">≈ {est}</span>{side === "buy" ? ccChip : usdcChip}</div>
+                    </div>
+                  </>
+                );
+              })()}
 
               {!isConnected ? (
                 <button className="btn primary block lg" disabled style={{ marginTop: 12 }}>Connect wallet</button>
               ) : !eligible ? (
                 <div style={{ marginTop: 12 }}>
-                  <div className="notice" style={{ marginBottom: 10 }}>One step before you buy: verify you're a real, eligible buyer with World ID.</div>
-                  <WorldVerify onVerified={pollEligible} label="Verify with World ID to buy" />
+                  <div className="notice" style={{ marginBottom: 10 }}>One step before you trade: verify you're a real, eligible participant with World ID.</div>
+                  <WorldVerify onVerified={pollEligible} label="Verify with World ID to trade" />
                 </div>
               ) : (
                 <>
                   <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-                    <a className="btn ghost" href={USDC_FAUCET} target="_blank" rel="noreferrer">Get USDC</a>
-                    {!approved && <button className="btn ghost" onClick={approve} disabled={!!busy}>Approve</button>}
+                    {side === "buy" && <a className="btn ghost" href={USDC_FAUCET} target="_blank" rel="noreferrer">Get USDC</a>}
+                    {!approved && <button className="btn ghost" onClick={approve} disabled={!!busy}>Approve {side === "buy" ? "USDC" : `cc${offer.provider}`}</button>}
                   </div>
-                  <button className="btn primary block lg" style={{ marginTop: 8 }} onClick={buy} disabled={!!busy || !approved || Number(usdcIn) <= 0}>{busy || `Buy cc${offer.provider}`}</button>
+                  <button className="btn primary block lg" style={{ marginTop: 8 }} onClick={trade} disabled={!!busy || !approved || amtNum <= 0}>{busy || `${side === "buy" ? "Buy" : "Sell"} cc${offer.provider}`}</button>
+                  {side === "sell" && <div className="notice" style={{ marginTop: 10 }}>Selling draws USDC from the pool, which fills up as others buy. Very early on there may be little to sell into.</div>}
                 </>
               )}
               {err && <div className="notice bad mono">{err}</div>}

@@ -199,6 +199,11 @@ input:focus, select:focus { outline: none; border-color: var(--ink); }
 /* swap fields */
 .field { background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px; }
 .field + .field { margin-top: 8px; }
+
+/* buy / sell direction toggle between the two fields */
+.flip-row { display: flex; justify-content: center; height: 0; position: relative; z-index: 1; }
+.flip-btn { margin-top: -14px; width: 34px; height: 34px; border-radius: 10px; border: 3px solid var(--panel); background: var(--ink); color: #fff; font-size: 14px; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: .15s; }
+.flip-btn:hover { transform: rotate(180deg); }
 .field .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
 .field .mid { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
 .field input { border: none; background: transparent; padding: 0; font-size: 27px; font-weight: 600; }

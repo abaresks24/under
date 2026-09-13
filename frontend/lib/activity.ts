@@ -8,7 +8,7 @@
 
 export type Activity = {
   id: string;
-  kind: "buy" | "list";
+  kind: "buy" | "sell" | "list";
   provider: string;
   label: string;
   amountUsd?: number;

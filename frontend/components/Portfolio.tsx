@@ -122,9 +122,9 @@ export function Portfolio({ onNavigate }: { onNavigate: (t: Tab) => void }) {
             <div className="mkt-row head" style={{ gridTemplateColumns: "1fr 2fr 1.2fr 1fr" }}><span>Type</span><span>Commitment</span><span className="mkt-hide-sm">Amount</span><span>Date</span></div>
             {acts.map((a) => (
               <div className="mkt-row" key={a.id} style={{ cursor: "default", gridTemplateColumns: "1fr 2fr 1.2fr 1fr" }}>
-                <span><span className={`mkt-tag ${a.kind === "buy" ? "live" : "preview"}`}>{a.kind === "buy" ? "Buy" : "List"}</span></span>
+                <span><span className={`mkt-tag ${a.kind === "list" ? "preview" : "live"}`}>{a.kind === "buy" ? "Buy" : a.kind === "sell" ? "Sell" : "List"}</span></span>
                 <span className="mkt-num" style={{ color: "var(--ink)" }}>{a.label}</span>
-                <span className="mkt-num mkt-hide-sm">{a.kind === "buy" ? usd(a.amountUsd || 0) : usd(a.faceValue || 0)}</span>
+                <span className="mkt-num mkt-hide-sm">{a.kind === "list" ? usd(a.faceValue || 0) : usd(a.amountUsd || 0)}</span>
                 <span className="mkt-num">{when(a.ts)}</span>
               </div>
             ))}

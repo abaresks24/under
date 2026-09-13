@@ -33,9 +33,15 @@ export function buildBuyFor(token: `0x${string}`, hook: `0x${string}`, usdcIn: b
 
 /** Build router.swap args for selling `tokenIn` ACME for USDC, exact-input. */
 export function buildSell(tokenIn: bigint) {
-  const zeroForOne = pool.tokenIsCurrency0; // input = token
+  return buildSellFor(addr.token as `0x${string}`, addr.hook as `0x${string}`, tokenIn);
+}
+
+/** Build router.swap args for selling `tokenIn` of `token` back for USDC, exact-input. */
+export function buildSellFor(token: `0x${string}`, hook: `0x${string}`, tokenIn: bigint) {
+  const tokenIsC0 = token.toLowerCase() < addr.usdc.toLowerCase();
+  const zeroForOne = tokenIsC0; // input = token; zeroForOne iff token is currency0
   return [
-    poolKey(),
+    poolKeyFor(token, hook),
     { zeroForOne, amountSpecified: -tokenIn, sqrtPriceLimitX96: zeroForOne ? MIN_SQRT : MAX_SQRT },
   ] as const;
 }
