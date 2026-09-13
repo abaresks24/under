@@ -44,6 +44,9 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; color: var(--
 /* nav */
 .nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; position: sticky; top: 0; z-index: 20; background: rgba(251,251,249,.82); backdrop-filter: saturate(180%) blur(12px); border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 18px; letter-spacing: -0.03em; color: var(--ink); }
+/* pull the logo + connect button out past the sections' band on the app nav */
+.nav > .brand { margin-left: -16px; }
+.nav > :last-child { margin-right: -16px; }
 .logo { width: 26px; height: 26px; border-radius: 8px; background: var(--ink); display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
 .tabs { display: flex; gap: 26px; }
 .tab { border: none; background: none; color: var(--muted); font: inherit; font-size: 15px; font-weight: 500; padding: 4px 0; cursor: pointer; position: relative; }
