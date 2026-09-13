@@ -64,3 +64,20 @@ All share the eligibility adapter, seller bond and router above; deployed via
 | Initech   | GCP      | 75k    | 2027-02-15 | `0x27baD6953BfB87D9DFf9Aa01034bfBba0b62ae04` | `0x0fE73d39676d1b003Ab745C4fa22B385FeCe4888` |
 | Umbrella  | Azure    | 320k   | 2027-12-15 | `0xe0B6881E5ce7045CA0F6A13644395B12554a96f0` | `0xEA9080489732Af5cCa822d1A317E675d2fA30888` |
 | Hooli     | AWS      | 180k   | 2028-06-15 | `0x816538b12989c84FbC30C22ceBD20F06f312eFE6` | `0x16F624C577A10C622aA8dEE8942e57BA573ec888` |
+
+## Migration to real Circle USDC (Sepolia)
+
+All markets were repointed from MockUSDC to **Circle USDC** `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
+(Ethereum Sepolia, 6dp). The CommitmentTokens, seller bond, eligibility adapter and router are reused;
+each market got a fresh hook + pool (`script/MigrateUSDC.s.sol`, one market per run), seeded token-only
+so no real USDC was needed to bootstrap — buyers pay real USDC in, sourced from faucet.circle.com.
+
+| Seller    | CommitmentToken                              | Hook (Circle-USDC pool)                      |
+|-----------|----------------------------------------------|----------------------------------------------|
+| Acme      | `0x4e9698256dC1654876086374B2B2655D97941280` | `0x94e886dD5F7D87DfEE94FE42bbdb802eFe954888` |
+| Northwind | `0x3420EFa01699a1de4dC0dEE604617240caDbe77f` | `0xAFb961e44254e6fF4dc4C0fb5c98E03F5AAC8888` |
+| Contoso   | `0x41bb7fB4183f7e938a88447c82214db1928Ecfa4` | `0xB4ea1c650267742dBdE5fFFcceE2777B1D25c888` |
+| Globex    | `0xF6e478CF307B5c6d28a62b41f714031b501051b7` | `0xFd87e00bA3aAfDED29673233118ddabceF7b0888` |
+| Initech   | `0x27baD6953BfB87D9DFf9Aa01034bfBba0b62ae04` | `0x06d1035aac6DDE7695171754d3d0d3F4Be078888` |
+| Umbrella  | `0xe0B6881E5ce7045CA0F6A13644395B12554a96f0` | `0xA540906fe1F3c970dA085c244453cE836711C888` |
+| Hooli     | `0x816538b12989c84FbC30C22ceBD20F06f312eFE6` | `0xdFCB60ffB81461dE0DE5A0dd483871Ef7b344888` |

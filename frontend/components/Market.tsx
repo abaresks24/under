@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
-import { addr } from "@/lib/config";
+import { addr, USDC_FAUCET } from "@/lib/config";
 import { tokenAbi, erc20Abi, hookAbi, adapterAbi, routerAbi } from "@/lib/abis";
 import { buildBuyFor } from "@/lib/pool";
 import { OFFERS, metrics, type Offer } from "@/lib/offers";
@@ -132,7 +132,7 @@ function MarketList({ offers, now, onSelect }: { offers: Offer[]; now: number; o
 function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack: () => void }) {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
-  const [usdcIn, setUsdcIn] = useState("1000");
+  const [usdcIn, setUsdcIn] = useState("10");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const [tx, setTx] = useState<`0x${string}` | undefined>();
@@ -164,7 +164,6 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
     catch (e: any) { setErr(e?.shortMessage ?? e?.message ?? "transaction failed"); return undefined; }
     finally { setBusy(""); }
   };
-  const faucet = () => run("Minting test USDC", () => writeContractAsync({ address: addr.usdc, abi: erc20Abi, functionName: "mint", args: [address!, parseUnits("10000", 6)] }));
   const approve = () => run("Approving", () => writeContractAsync({ address: addr.usdc, abi: erc20Abi, functionName: "approve", args: [addr.router, maxUint256] }));
   const buy = async () => {
     const h = await run("Buying", () => writeContractAsync({ address: addr.router, abi: routerAbi, functionName: "swap", args: buildBuyFor(tok, hk, parseUnits(usdcIn || "0", 6)) as any }));
@@ -242,7 +241,7 @@ function OfferDetail({ offer, now, onBack }: { offer: Offer; now: number; onBack
               ) : (
                 <>
                   <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-                    <button className="btn ghost" onClick={faucet} disabled={!!busy}>Get test USDC</button>
+                    <a className="btn ghost" href={USDC_FAUCET} target="_blank" rel="noreferrer">Get USDC</a>
                     {!approved && <button className="btn ghost" onClick={approve} disabled={!!busy}>Approve</button>}
                   </div>
                   <button className="btn primary block lg" style={{ marginTop: 8 }} onClick={buy} disabled={!!busy || !approved || Number(usdcIn) <= 0}>{busy || `Buy cc${offer.provider}`}</button>

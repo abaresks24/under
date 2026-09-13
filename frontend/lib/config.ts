@@ -5,15 +5,18 @@ import { injected } from "wagmi/connectors";
 /** Live Sepolia deployment (see ../addresses.ts / docs/DEPLOYMENTS.md). */
 export const addr = {
   poolManager: "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543",
-  usdc: "0x768f42455a2d082e23ceef7d51e5787c82d67a39", // MockUSDC (mintable, 6dp)
-  token: "0x4e9698256dC1654876086374B2B2655D97941280", // CommitmentToken ccAWS
+  usdc: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Circle USDC, Ethereum Sepolia (real, 6dp)
+  token: "0x4e9698256dC1654876086374B2B2655D97941280", // CommitmentToken ccAWS (Acme)
   resolver: "0xD682c2f8C498A3B08C52E7c27891284Ab7A79dAe",
   registry: "0x05E00f06019DE4964314B6Ff727a098341c0f17a",
   adapter: "0x4B909eE2C0c919D18b284177EE2830457E14818A",
   bond: "0x9a880f885445bAF769E98D57Dda814E3d6aADef4",
-  hook: "0xB5E5daeE51a2cbd5db6Fc021db0A091cac928888",
+  hook: "0x94e886dD5F7D87DfEE94FE42bbdb802eFe954888", // Acme hook (Circle-USDC pool)
   router: "0xc0363da931c198fab1533F2B1486d794A5931B6c",
 } as const;
+
+/** Where buyers get real testnet USDC (Circle faucet, ~10 USDC / request). */
+export const USDC_FAUCET = "https://faucet.circle.com";
 
 /** cloudcredits.eth node (the demo seller identity). */
 export const DEMO_NODE = "0xfc47d1666a0b864f859c0b1b22510ec26cd8f97786426433b8031f31ef03c78b" as const;
