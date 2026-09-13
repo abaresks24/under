@@ -7,8 +7,8 @@ delegated role) and a World Selfie Check.
 
 > ETHGlobal submission. Single chain: **Sepolia (11155111)**. Tracks: Uniswap Foundation (Best
 > Uniswap Stack Contribution), ENS (Best Use of ENSv2), World (Selfie Check).
-> **Live demo:** https://cloud-credits-abaresks24s-projects.vercel.app ·
-> **Docs:** https://cloud-credits-abaresks24s-projects.vercel.app/docs
+> **Live demo:** https://under-market.vercel.app ·
+> **Docs:** https://under-market.vercel.app/docs
 
 ---
 
@@ -65,8 +65,8 @@ time to expiry — which is what makes the hook *necessary*, not decorative.
 ## Tests
 
 ```bash
-git clone --recurse-submodules https://github.com/abaresks24/cloud-credits
-cd cloud-credits
+git clone --recurse-submodules https://github.com/abaresks24/under
+cd under
 forge test          # 36 passing across 6 suites
 ```
 
